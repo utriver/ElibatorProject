@@ -1,64 +1,109 @@
 ﻿<Window x:Class="ElevatorPanel.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Elevator Control Panel" Height="680" Width="1000"
+        Title="Elevator Control Panel" Height="700" Width="900"
         Background="#FF111111">
 
     <Window.Resources>
-        <!-- 층 버튼 스타일 (파란 사각형) -->
-        <Style x:Key="FloorButtonStyle" TargetType="Border">
+        <!-- 층 버튼 -->
+        <Style x:Key="FloorButtonStyle" TargetType="Button">
             <Setter Property="Width" Value="80"/>
             <Setter Property="Height" Value="80"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="White"/>
             <Setter Property="Background" Value="#FF3355CC"/>
-            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Margin" Value="0,6"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="10"
+                                BorderThickness="0">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#FF1133AA"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#FF4466DD"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
-        <!-- 슬라이드 스위치 베이스 (회색) -->
-        <Style x:Key="SwitchBaseStyle" TargetType="Border">
-            <Setter Property="Width" Value="90"/>
-            <Setter Property="Height" Value="18"/>
-            <Setter Property="Background" Value="#FF555555"/>
-            <Setter Property="CornerRadius" Value="4"/>
-            <Setter Property="Margin" Value="0,2"/>
-        </Style>
-
-        <!-- 슬라이드 스위치 핸들 (파란색) -->
-        <Style x:Key="SwitchHandleOnStyle" TargetType="Border">
-            <Setter Property="Width" Value="50"/>
-            <Setter Property="Height" Value="18"/>
-            <Setter Property="Background" Value="#FF4477FF"/>
-            <Setter Property="CornerRadius" Value="4"/>
-            <Setter Property="HorizontalAlignment" Value="Right"/>
-        </Style>
-
-        <!-- 슬라이드 스위치 핸들 OFF (빨간) -->
-        <Style x:Key="SwitchHandleOffStyle" TargetType="Border">
-            <Setter Property="Width" Value="35"/>
-            <Setter Property="Height" Value="18"/>
-            <Setter Property="Background" Value="#FFCC2222"/>
-            <Setter Property="CornerRadius" Value="4"/>
-            <Setter Property="HorizontalAlignment" Value="Right"/>
-        </Style>
-
-        <!-- 방향 버튼 (▲▼ 파란색) -->
-        <Style x:Key="ArrowBtnStyle" TargetType="Border">
-            <Setter Property="Width" Value="28"/>
-            <Setter Property="Height" Value="22"/>
+        <!-- 화살표 버튼 -->
+        <Style x:Key="ArrowButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="30"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Foreground" Value="White"/>
             <Setter Property="Background" Value="#FF3355CC"/>
-            <Setter Property="CornerRadius" Value="3"/>
+            <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Margin" Value="0,1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="3">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#FF1133AA"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#FF4466DD"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
-        <!-- LED 원형 (회색 = OFF) -->
+        <!-- 열림/닫힘 버튼 -->
+        <Style x:Key="DoorButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="70"/>
+            <Setter Property="Height" Value="50"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#FF225599"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Margin" Value="6,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#FF113377"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#FF3366BB"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- LED 원형 -->
         <Style x:Key="LedOffStyle" TargetType="Ellipse">
             <Setter Property="Width" Value="20"/>
             <Setter Property="Height" Value="20"/>
             <Setter Property="Fill" Value="#FF777777"/>
             <Setter Property="Margin" Value="4,1"/>
         </Style>
-
-        <!-- LED 원형 (빨강 = ON) -->
         <Style x:Key="LedOnStyle" TargetType="Ellipse">
             <Setter Property="Width" Value="20"/>
             <Setter Property="Height" Value="20"/>
@@ -66,78 +111,59 @@
             <Setter Property="Margin" Value="4,1"/>
         </Style>
 
-        <!-- 둥근 제어 버튼 -->
-        <Style x:Key="RoundCtrlStyle" TargetType="Border">
-            <Setter Property="Width" Value="54"/>
-            <Setter Property="Height" Value="54"/>
-            <Setter Property="CornerRadius" Value="27"/>
-            <Setter Property="Background" Value="#FF666666"/>
+        <!-- 7세그먼트 세그먼트 (회색 고정) -->
+        <Style x:Key="SegHStyle" TargetType="Border">
+            <Setter Property="Height" Value="10"/>
+            <Setter Property="Width" Value="55"/>
+            <Setter Property="Background" Value="#FF555555"/>
+            <Setter Property="CornerRadius" Value="3"/>
+            <Setter Property="Margin" Value="8,0"/>
+        </Style>
+        <Style x:Key="SegVStyle" TargetType="Border">
+            <Setter Property="Width" Value="10"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Background" Value="#FF555555"/>
+            <Setter Property="CornerRadius" Value="3"/>
         </Style>
     </Window.Resources>
 
-    <Grid Margin="16">
+    <Grid Margin="12">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="100"/>
             <!-- 층 버튼 -->
-            <ColumnDefinition Width="280"/>
-            <!-- 스위치 + 샤프트 -->
+            <ColumnDefinition Width="260"/>
+            <!-- 샤프트 패널 -->
             <ColumnDefinition Width="*"/>
-            <!-- 오른쪽 패널 -->
+            <!-- 오른쪽 상태 패널 -->
         </Grid.ColumnDefinitions>
 
-        <!-- ===================== 왼쪽: 층 버튼 ===================== -->
+        <!-- ======= 왼쪽: 층 버튼 ======= -->
         <StackPanel Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center">
-
-            <!-- 5층 -->
-            <Border Style="{StaticResource FloorButtonStyle}">
-                <Grid>
-                    <TextBlock Text="5층" Foreground="White" FontSize="16" FontWeight="Bold"
-                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                </Grid>
-            </Border>
-
-            <!-- 4층 -->
-            <Border Style="{StaticResource FloorButtonStyle}">
-                <TextBlock Text="4층" Foreground="White" FontSize="16" FontWeight="Bold"
-                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
-            </Border>
-
-            <!-- 3층 -->
-            <Border Style="{StaticResource FloorButtonStyle}">
-                <TextBlock Text="3층" Foreground="White" FontSize="16" FontWeight="Bold"
-                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
-            </Border>
-
-            <!-- 2층 -->
-            <Border Style="{StaticResource FloorButtonStyle}">
-                <TextBlock Text="2층" Foreground="White" FontSize="16" FontWeight="Bold"
-                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
-            </Border>
-
-            <!-- 1층 -->
-            <Border Style="{StaticResource FloorButtonStyle}">
-                <TextBlock Text="1층" Foreground="White" FontSize="16" FontWeight="Bold"
-                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
-            </Border>
+            <Button x:Name="Btn5F" Style="{StaticResource FloorButtonStyle}"
+                    Content="5층" Click="FloorButton_Click" Tag="5"/>
+            <Button x:Name="Btn4F" Style="{StaticResource FloorButtonStyle}"
+                    Content="4층" Click="FloorButton_Click" Tag="4"/>
+            <Button x:Name="Btn3F" Style="{StaticResource FloorButtonStyle}"
+                    Content="3층" Click="FloorButton_Click" Tag="3"/>
+            <Button x:Name="Btn2F" Style="{StaticResource FloorButtonStyle}"
+                    Content="2층" Click="FloorButton_Click" Tag="2"/>
+            <Button x:Name="Btn1F" Style="{StaticResource FloorButtonStyle}"
+                    Content="1층" Click="FloorButton_Click" Tag="1"/>
         </StackPanel>
 
-        <!-- ===================== 가운데: 스위치 + 샤프트 ===================== -->
+        <!-- ======= 가운데: 샤프트 패널 ======= -->
         <Border Grid.Column="1" BorderBrush="#FF888888" BorderThickness="2"
-                Margin="10,0" Padding="10,8">
+                Margin="10,0" Padding="8,6">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="100"/>
-                    <!-- 스위치 2열 -->
-                    <ColumnDefinition Width="80"/>
+                    <ColumnDefinition Width="*"/>
                     <!-- 엘리베이터 칸 -->
                     <ColumnDefinition Width="60"/>
                     <!-- 버튼+LED -->
                 </Grid.ColumnDefinitions>
 
-                <!-- 스위치 영역 -->
-
-                <!-- 엘리베이터 칸 (회색 사각형들) -->
-                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="5,0">
+                <!-- 엘리베이터 칸 (회색) -->
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,6,0">
                     <Border Height="95" Background="#FF888888" Margin="0,4" CornerRadius="2"/>
                     <Border Height="95" Background="#FF888888" Margin="0,4" CornerRadius="2"/>
                     <Border Height="95" Background="#FF888888" Margin="0,4" CornerRadius="2"/>
@@ -145,162 +171,153 @@
                     <Border Height="95" Background="#FF888888" Margin="0,4" CornerRadius="2"/>
                 </StackPanel>
 
-                <!-- 방향 버튼 + LED -->
-                <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                <!-- 화살표 버튼 + LED -->
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
 
-                    <!-- 5층: ▼ + LED -->
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,60" HorizontalAlignment="Center">
-                        <Border Style="{StaticResource ArrowBtnStyle}">
-                            <TextBlock Text="▼" Foreground="White" FontSize="11"
-                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <Ellipse Style="{StaticResource LedOffStyle}"/>
+                    <!-- 5층: ▼ -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,68" HorizontalAlignment="Center">
+                        <Button Style="{StaticResource ArrowButtonStyle}" Content="▼"
+                                Click="ArrowDown_Click" Tag="5"/>
+                        <Ellipse x:Name="Led5D" Style="{StaticResource LedOffStyle}"/>
                     </StackPanel>
 
-                    <!-- 4층: ▲▼ + LED 2개 -->
-                    <StackPanel Margin="0,0,0,54" HorizontalAlignment="Center">
+                    <!-- 4층: ▲▼ -->
+                    <StackPanel Margin="0,0,0,62" HorizontalAlignment="Center">
                         <StackPanel Orientation="Horizontal">
-                            <Border Style="{StaticResource ArrowBtnStyle}">
-                                <TextBlock Text="▲" Foreground="White" FontSize="11"
-                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <Ellipse Style="{StaticResource LedOffStyle}"/>
+                            <Button Style="{StaticResource ArrowButtonStyle}" Content="▲"
+                                    Click="ArrowUp_Click" Tag="4"/>
+                            <Ellipse x:Name="Led4U" Style="{StaticResource LedOffStyle}"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
-                            <Border Style="{StaticResource ArrowBtnStyle}">
-                                <TextBlock Text="▼" Foreground="White" FontSize="11"
-                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <Ellipse Style="{StaticResource LedOffStyle}"/>
+                            <Button Style="{StaticResource ArrowButtonStyle}" Content="▼"
+                                    Click="ArrowDown_Click" Tag="4"/>
+                            <Ellipse x:Name="Led4D" Style="{StaticResource LedOffStyle}"/>
                         </StackPanel>
                     </StackPanel>
 
-                    <!-- 3층: ▲▼ + LED 2개 -->
-                    <StackPanel Margin="0,0,0,54" HorizontalAlignment="Center">
+                    <!-- 3층: ▲▼ -->
+                    <StackPanel Margin="0,0,0,62" HorizontalAlignment="Center">
                         <StackPanel Orientation="Horizontal">
-                            <Border Style="{StaticResource ArrowBtnStyle}">
-                                <TextBlock Text="▲" Foreground="White" FontSize="11"
-                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <Ellipse Style="{StaticResource LedOffStyle}"/>
+                            <Button Style="{StaticResource ArrowButtonStyle}" Content="▲"
+                                    Click="ArrowUp_Click" Tag="3"/>
+                            <Ellipse x:Name="Led3U" Style="{StaticResource LedOffStyle}"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
-                            <Border Style="{StaticResource ArrowBtnStyle}">
-                                <TextBlock Text="▼" Foreground="White" FontSize="11"
-                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <Ellipse Style="{StaticResource LedOnStyle}"/>
+                            <Button Style="{StaticResource ArrowButtonStyle}" Content="▼"
+                                    Click="ArrowDown_Click" Tag="3"/>
+                            <Ellipse x:Name="Led3D" Style="{StaticResource LedOffStyle}"/>
                         </StackPanel>
                     </StackPanel>
 
-                    <!-- 2층: ▲▼ + LED 2개 -->
-                    <StackPanel Margin="0,0,0,54" HorizontalAlignment="Center">
+                    <!-- 2층: ▲▼ -->
+                    <StackPanel Margin="0,0,0,62" HorizontalAlignment="Center">
                         <StackPanel Orientation="Horizontal">
-                            <Border Style="{StaticResource ArrowBtnStyle}">
-                                <TextBlock Text="▲" Foreground="White" FontSize="11"
-                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <Ellipse Style="{StaticResource LedOffStyle}"/>
+                            <Button Style="{StaticResource ArrowButtonStyle}" Content="▲"
+                                    Click="ArrowUp_Click" Tag="2"/>
+                            <Ellipse x:Name="Led2U" Style="{StaticResource LedOffStyle}"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
-                            <Border Style="{StaticResource ArrowBtnStyle}">
-                                <TextBlock Text="▼" Foreground="White" FontSize="11"
-                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <Ellipse Style="{StaticResource LedOffStyle}"/>
+                            <Button Style="{StaticResource ArrowButtonStyle}" Content="▼"
+                                    Click="ArrowDown_Click" Tag="2"/>
+                            <Ellipse x:Name="Led2D" Style="{StaticResource LedOffStyle}"/>
                         </StackPanel>
                     </StackPanel>
 
-                    <!-- 1층: ▲ + LED -->
+                    <!-- 1층: ▲ -->
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <Border Style="{StaticResource ArrowBtnStyle}">
-                            <TextBlock Text="▲" Foreground="White" FontSize="11"
-                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <Ellipse Style="{StaticResource LedOffStyle}"/>
+                        <Button Style="{StaticResource ArrowButtonStyle}" Content="▲"
+                                Click="ArrowUp_Click" Tag="1"/>
+                        <Ellipse x:Name="Led1U" Style="{StaticResource LedOffStyle}"/>
                     </StackPanel>
 
                 </StackPanel>
             </Grid>
         </Border>
 
-        <!-- ===================== 오른쪽: 상태 패널 ===================== -->
+        <!-- ======= 오른쪽: 상태 패널 ======= -->
         <Grid Grid.Column="2" Margin="20,0,0,0">
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <!-- 방향 + 7세그 -->
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
+                <!-- 열림/닫힘 -->
             </Grid.RowDefinitions>
 
-            <!-- 상단: 방향 표시 + 7세그먼트 -->
+            <!-- 방향 삼각형 + 7세그먼트 -->
             <Grid Grid.Row="0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- 방향 삼각형 -->
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center">
-                    <!-- 위 삼각형 (빨강 = 상승 중) -->
-                    <Polygon Points="60,0 120,80 0,80" Fill="#FFEE2222" Margin="0,0,0,16"
-                             HorizontalAlignment="Center"/>
-                    <!-- 아래 삼각형 (회색 = 비활성) -->
-                    <Polygon Points="0,0 120,0 60,80" Fill="#FF666666"
-                             HorizontalAlignment="Center"/>
+                <!-- 방향 삼각형 (둘 다 회색) -->
+                <StackPanel Grid.Column="0" VerticalAlignment="Center"
+                            HorizontalAlignment="Center" Margin="0,10">
+                    <Polygon x:Name="TriUp" Points="55,0 110,70 0,70"
+                             Fill="#FF555555" HorizontalAlignment="Center" Margin="0,0,0,12"/>
+                    <Polygon x:Name="TriDown" Points="0,0 110,0 55,70"
+                             Fill="#FF555555" HorizontalAlignment="Center"/>
                 </StackPanel>
 
-                <!-- 7세그먼트 숫자 표시 -->
-                <Grid Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <!-- 7세그먼트 모양 (숫자 1 예시) -->
-                    <StackPanel>
-                        <!-- 상단 가로 세그먼트 -->
-                        <!-- 중단 가로 세그먼트 -->
-                        <StackPanel Orientation="Horizontal" Margin="0,4"/>
-                        <!-- 중간 가로 세그먼트 -->
-                        <!-- 하단 가로 세그먼트 -->
-                        <StackPanel Orientation="Horizontal" Margin="0,4"/>
-                        <!-- 최하단 가로 세그먼트 -->
-                    </StackPanel>
+                <!-- 7세그먼트 (모두 회색) -->
+                <Grid Grid.Column="1" HorizontalAlignment="Center"
+                      VerticalAlignment="Center" Margin="0,10">
+                    <!-- 상단 가로 -->
+                    <Border Style="{StaticResource SegHStyle}"
+                            VerticalAlignment="Top" HorizontalAlignment="Center"/>
+                    <!-- 중간 가로 -->
+                    <Border Style="{StaticResource SegHStyle}"
+                            VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <!-- 하단 가로 -->
+                    <Border Style="{StaticResource SegHStyle}"
+                            VerticalAlignment="Bottom" HorizontalAlignment="Center"/>
+                    <!-- 좌상 세로 -->
+                    <Border Style="{StaticResource SegVStyle}"
+                            HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,12,0,0"/>
+                    <!-- 우상 세로 -->
+                    <Border Style="{StaticResource SegVStyle}"
+                            HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,12,0,0"/>
+                    <!-- 좌하 세로 -->
+                    <Border Style="{StaticResource SegVStyle}"
+                            HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="0,0,0,12"/>
+                    <!-- 우하 세로 -->
+                    <Border Style="{StaticResource SegVStyle}"
+                            HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,0,12"/>
+                    <!-- 투명 패딩용 -->
+                    <Border Width="73" Height="110" Background="Transparent"/>
                 </Grid>
             </Grid>
 
-            <!-- 하단: 현재층 숫자 + 제어 버튼 -->
-            <Grid Grid.Row="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <!-- 현재 층 숫자 + 제어버튼 -->
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center">
-                    <!-- 현재 층 숫자 (픽셀 폰트 느낌) -->
-
-                    <!-- 고장 버튼 -->
-                    <Border Style="{StaticResource RoundCtrlStyle}" HorizontalAlignment="Center" Margin="0,6">
-                        <TextBlock Text="고장" Foreground="White" FontSize="13" FontWeight="Bold"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
-
-                    <!-- 정지 / 운전 버튼 -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,6">
-                        <Border Style="{StaticResource RoundCtrlStyle}" Margin="4,0">
-                            <TextBlock Text="정지" Foreground="White" FontSize="13" FontWeight="Bold"
+            <!-- 열림 / 닫힘 버튼 -->
+            <StackPanel Grid.Row="1" Orientation="Horizontal"
+                        HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Button x:Name="BtnOpen" Style="{StaticResource DoorButtonStyle}"
+                        Click="DoorOpen_Click">
+                    <StackPanel HorizontalAlignment="Center">
+                        <!-- 열림 아이콘: 화살표 바깥쪽 -->
+                        <Grid Width="40" Height="20">
+                            <TextBlock Text="◀  ▶" Foreground="White" FontSize="13"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <Border Width="54" Height="54" CornerRadius="27"
-                                Background="#FFCC2222" Margin="4,0">
-                            <TextBlock Text="운전" Foreground="White" FontSize="13" FontWeight="Bold"
-                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
+                        </Grid>
+                        <TextBlock Text="열림" Foreground="White" FontSize="12"
+                                   HorizontalAlignment="Center"/>
                     </StackPanel>
-                </StackPanel>
+                </Button>
 
-                <!-- 빨강 / 초록 큰 표시등 -->
-                <StackPanel Grid.Column="1" Orientation="Horizontal"
-                            HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,20">
-                    <Border Width="90" Height="90" Background="#FFCC2222" CornerRadius="6" Margin="6,0"/>
-                    <Border Width="90" Height="90" Background="#FF44CC44" CornerRadius="6" Margin="6,0"/>
-                </StackPanel>
-            </Grid>
+                <Button x:Name="BtnClose" Style="{StaticResource DoorButtonStyle}"
+                        Click="DoorClose_Click">
+                    <StackPanel HorizontalAlignment="Center">
+                        <!-- 닫힘 아이콘: 화살표 안쪽 -->
+                        <Grid Width="40" Height="20">
+                            <TextBlock Text="▶  ◀" Foreground="White" FontSize="13"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Grid>
+                        <TextBlock Text="닫힘" Foreground="White" FontSize="12"
+                                   HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+
         </Grid>
     </Grid>
 </Window>
