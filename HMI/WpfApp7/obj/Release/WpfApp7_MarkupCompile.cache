@@ -4,11 +4,11 @@
 winexe
 C#
 .cs
-C:\Users\hyh01\source\repos\ElibatorProject\HMI\WpfApp7\obj\Debug\
+C:\Users\hyh01\source\repos\ElibatorProject\HMI\WpfApp7\obj\Release\
 WpfApp7
 none
 false
-DEBUG;TRACE
+TRACE
 C:\Users\hyh01\source\repos\ElibatorProject\HMI\WpfApp7\App.xaml
 1219584333
 

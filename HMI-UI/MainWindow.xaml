@@ -1,0 +1,374 @@
+﻿<Window x:Class="ElevatorPLC.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Elevator HMI" Height="680" Width="870"
+        Background="#111111" ResizeMode="CanMinimize"
+        WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <!-- 공통 색상 -->
+        <SolidColorBrush x:Key="AccentBrush"     Color="#FFAA55"/>
+        <SolidColorBrush x:Key="PanelBrush"      Color="#1A1A1A"/>
+        <SolidColorBrush x:Key="ShaftBgBrush"    Color="#2C3650"/>
+        <SolidColorBrush x:Key="ShaftCellBrush"  Color="#1E2A40"/>
+        <SolidColorBrush x:Key="BorderBrush2"    Color="#4A5878"/>
+
+        <!-- 층 버튼 스타일 (원형) -->
+        <Style x:Key="FloorBtnStyle" TargetType="Button">
+            <Setter Property="Width"  Value="60"/>
+            <Setter Property="Height" Value="60"/>
+            <Setter Property="Margin" Value="4"/>
+            <Setter Property="FontFamily" Value="Courier New"/>
+            <Setter Property="FontSize"   Value="20"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#333333"/>
+            <Setter Property="Cursor"     Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <Ellipse x:Name="Bg">
+                                <Ellipse.Fill>
+                                    <RadialGradientBrush GradientOrigin="0.35,0.35" Center="0.35,0.35" RadiusX="0.65" RadiusY="0.65">
+                                        <GradientStop Color="#DDDDDD" Offset="0"/>
+                                        <GradientStop Color="#999999" Offset="0.6"/>
+                                        <GradientStop Color="#777777" Offset="1"/>
+                                    </RadialGradientBrush>
+                                </Ellipse.Fill>
+                            </Ellipse>
+                            <Ellipse x:Name="Glow" Opacity="0">
+                                <Ellipse.Fill>
+                                    <RadialGradientBrush GradientOrigin="0.35,0.35" Center="0.35,0.35">
+                                        <GradientStop Color="#FFEE88" Offset="0"/>
+                                        <GradientStop Color="#FFCC00" Offset="0.6"/>
+                                        <GradientStop Color="#CC9900" Offset="1"/>
+                                    </RadialGradientBrush>
+                                </Ellipse.Fill>
+                            </Ellipse>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="Fill">
+                                    <Setter.Value>
+                                        <RadialGradientBrush GradientOrigin="0.35,0.35" Center="0.35,0.35">
+                                            <GradientStop Color="#EEEEEE" Offset="0"/>
+                                            <GradientStop Color="#BBBBBB" Offset="0.6"/>
+                                            <GradientStop Color="#999999" Offset="1"/>
+                                        </RadialGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Glow" Property="Opacity" Value="1"/>
+                                <Setter Property="Foreground" Value="#553300"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 액션 버튼 스타일 (작은 원형) -->
+        <Style x:Key="ActionBtnStyle" TargetType="Button">
+            <Setter Property="Width"  Value="54"/>
+            <Setter Property="Height" Value="54"/>
+            <Setter Property="Margin" Value="4"/>
+            <Setter Property="FontSize"   Value="14"/>
+            <Setter Property="Foreground" Value="#333333"/>
+            <Setter Property="Cursor"     Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <Ellipse>
+                                <Ellipse.Fill>
+                                    <RadialGradientBrush GradientOrigin="0.35,0.35" Center="0.35,0.35">
+                                        <GradientStop Color="#C8C8C8" Offset="0"/>
+                                        <GradientStop Color="#888888" Offset="0.6"/>
+                                        <GradientStop Color="#666666" Offset="1"/>
+                                    </RadialGradientBrush>
+                                </Ellipse.Fill>
+                            </Ellipse>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="220"/>
+            <!-- 샤프트뷰 -->
+            <ColumnDefinition Width="*"/>
+            <!-- 도어뷰 -->
+            <ColumnDefinition Width="200"/>
+            <!-- 컨트롤패널 -->
+        </Grid.ColumnDefinitions>
+
+        <!-- ══════════════════════════════
+             LEFT: 샤프트뷰
+        ══════════════════════════════ -->
+        <Grid Grid.Column="0" Background="#2C3650">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- 타이틀 -->
+            <Border Grid.Row="0" BorderBrush="#4A5878" BorderThickness="0,0,0,1" Padding="0,10,0,10">
+                <TextBlock Text="E L E V A T O R"
+                           HorizontalAlignment="Center"
+                           FontFamily="Courier New" FontSize="13" FontWeight="Bold"
+                           Foreground="White"/>
+            </Border>
+
+            <!-- 층 목록 + 카 캔버스 -->
+            <Grid Grid.Row="1" Margin="8">
+                <!-- 층 행들 (ItemsControl) -->
+                <ItemsControl x:Name="ShaftItemsControl" VerticalAlignment="Stretch">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="1"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <!-- 층 행은 코드비하인드에서 동적 생성 -->
+                </ItemsControl>
+
+                <!-- 카가 이동하는 Canvas (절대좌표) -->
+                <Canvas x:Name="ShaftCanvas" IsHitTestVisible="False">
+                    <!-- 엘리베이터 카 -->
+                    <Border x:Name="ElevatorCar"
+                            Width="70" Height="48"
+                            Background="#5A6888"
+                            BorderBrush="#8A9AB8" BorderThickness="1"
+                            CornerRadius="2"
+                            Canvas.Left="0">
+                        <Border.Effect>
+                            <DropShadowEffect Color="Black" BlurRadius="10" Opacity="0.5" ShadowDepth="3"/>
+                        </Border.Effect>
+                        <!-- 카 내부 도어 (Canvas + TranslateTransform 슬라이드) -->
+                        <Canvas Margin="5,7,5,7" ClipToBounds="True">
+                            <!-- 왼쪽 도어 패널 -->
+                            <Rectangle x:Name="CarDoorLeft"
+                                       Width="28" Height="34"
+                                       Canvas.Left="0" Canvas.Top="0">
+                                <Rectangle.Fill>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                        <GradientStop Color="#FFD4A8" Offset="0"/>
+                                        <GradientStop Color="#FFAA70" Offset="0.4"/>
+                                        <GradientStop Color="#FFB880" Offset="0.7"/>
+                                        <GradientStop Color="#F09060" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Rectangle.Fill>
+                                <Rectangle.RenderTransform>
+                                    <TranslateTransform x:Name="CarDoorLeftTx" X="0"/>
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+                            <!-- 가운데 갭 -->
+                            <Rectangle x:Name="CarDoorGap"
+                                       Width="2" Height="34"
+                                       Canvas.Left="29" Canvas.Top="0"
+                                       Fill="#1E2A40"/>
+                            <!-- 오른쪽 도어 패널 -->
+                            <Rectangle x:Name="CarDoorRight"
+                                       Width="28" Height="34"
+                                       Canvas.Left="31" Canvas.Top="0">
+                                <Rectangle.Fill>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                        <GradientStop Color="#FFD4A8" Offset="0"/>
+                                        <GradientStop Color="#FFAA70" Offset="0.4"/>
+                                        <GradientStop Color="#FFB880" Offset="0.7"/>
+                                        <GradientStop Color="#F09060" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Rectangle.Fill>
+                                <Rectangle.RenderTransform>
+                                    <TranslateTransform x:Name="CarDoorRightTx" X="0"/>
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+                        </Canvas>
+                    </Border>
+                </Canvas>
+            </Grid>
+        </Grid>
+
+        <!-- ══════════════════════════════
+             MIDDLE: 도어뷰
+        ══════════════════════════════ -->
+        <Grid Grid.Column="1" Background="#2A2A2A">
+            <!-- 방향 표시 -->
+            <TextBlock x:Name="DirIndicator"
+                       Text="" FontSize="32" Foreground="#FFCC00"
+                       HorizontalAlignment="Center" VerticalAlignment="Top"
+                       Margin="0,14,0,0" Visibility="Hidden"
+                       FontFamily="Segoe UI Symbol">
+                <TextBlock.Effect>
+                    <DropShadowEffect Color="#FFCC00" BlurRadius="15" Opacity="0.8" ShadowDepth="0"/>
+                </TextBlock.Effect>
+            </TextBlock>
+
+            <!-- 엘리베이터 프레임 -->
+            <Border Margin="24,16,24,32"
+                    BorderBrush="#888888" BorderThickness="8"
+                    CornerRadius="2"
+                    ClipToBounds="True">
+                <Grid>
+                    <!-- 내부 배경 (도어 열렸을 때) -->
+                    <Grid x:Name="InteriorGrid" Opacity="0">
+                        <Rectangle x:Name="InteriorBg">
+                            <Rectangle.Fill>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Color="#E8F0F8" Offset="0"/>
+                                    <GradientStop Color="#C0D0E0" Offset="0.6"/>
+                                    <GradientStop Color="#A0B8CC" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                        <!-- 층 이름 표시 -->
+                        <Border Background="#BB000000" CornerRadius="3"
+                                HorizontalAlignment="Center" VerticalAlignment="Top"
+                                Margin="0,24,0,0" Padding="20,10">
+                            <StackPanel>
+                                <TextBlock x:Name="InteriorFloorName"
+                                           Text="로비"
+                                           FontSize="24" FontWeight="Bold"
+                                           Foreground="White" TextAlignment="Center"
+                                           FontFamily="Noto Sans KR, Malgun Gothic"/>
+                                <TextBlock x:Name="InteriorFloorNum"
+                                           Text="1층"
+                                           FontSize="12" Foreground="#AAAAAA"
+                                           TextAlignment="Center" Margin="0,3,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <!-- 도어 (두 패널) -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="3"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- 왼쪽 도어 -->
+                        <Border x:Name="DoorLeft" Grid.Column="0"
+                                RenderTransformOrigin="0,0.5">
+                            <Border.RenderTransform>
+                                <TranslateTransform x:Name="DoorLeftTransform" X="0"/>
+                            </Border.RenderTransform>
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="#D8D8D8" Offset="0"/>
+                                    <GradientStop Color="#B0B0B0" Offset="0.15"/>
+                                    <GradientStop Color="#E8E8E8" Offset="0.3"/>
+                                    <GradientStop Color="#C0C0C0" Offset="0.5"/>
+                                    <GradientStop Color="#D0D0D0" Offset="0.65"/>
+                                    <GradientStop Color="#A8A8A8" Offset="0.8"/>
+                                    <GradientStop Color="#C8C8C8" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+
+                        <!-- 도어 갭 -->
+                        <Rectangle x:Name="DoorGap" Grid.Column="1" Fill="#111111"/>
+
+                        <!-- 오른쪽 도어 -->
+                        <Border x:Name="DoorRight" Grid.Column="2"
+                                RenderTransformOrigin="1,0.5">
+                            <Border.RenderTransform>
+                                <TranslateTransform x:Name="DoorRightTransform" X="0"/>
+                            </Border.RenderTransform>
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="#D8D8D8" Offset="0"/>
+                                    <GradientStop Color="#B0B0B0" Offset="0.15"/>
+                                    <GradientStop Color="#E8E8E8" Offset="0.3"/>
+                                    <GradientStop Color="#C0C0C0" Offset="0.5"/>
+                                    <GradientStop Color="#A8A8A8" Offset="0.8"/>
+                                    <GradientStop Color="#C8C8C8" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- 상태 텍스트 -->
+            <TextBlock x:Name="StatusText"
+                       Text="상태: 대기중"
+                       HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                       Margin="0,0,0,8"
+                       FontFamily="Courier New" FontSize="11"
+                       Foreground="#666666"/>
+        </Grid>
+
+        <!-- ══════════════════════════════
+             RIGHT: 컨트롤패널
+        ══════════════════════════════ -->
+        <Grid Grid.Column="2" Background="#1A1A1A">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <!-- 층 안내판 -->
+                <RowDefinition Height="Auto"/>
+                <!-- 디스플레이 + 버튼 -->
+            </Grid.RowDefinitions>
+
+            <!-- 층 안내판 -->
+            <ItemsControl x:Name="FloorGuideControl"
+                          Grid.Row="0"
+                          Background="#111111"
+                          VerticalAlignment="Stretch">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="1"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+
+            <!-- 하단: 디스플레이 + 버튼 -->
+            <StackPanel Grid.Row="1" HorizontalAlignment="Center" Margin="10,10,10,14">
+
+                <!-- 층 번호 디스플레이 -->
+                <Border Background="#000000" BorderBrush="#2A2A2A" BorderThickness="2"
+                        CornerRadius="3" Margin="0,0,0,10" Padding="0,8">
+                    <Grid>
+                        <TextBlock x:Name="FloorDisplay"
+                                   Text="1"
+                                   HorizontalAlignment="Center"
+                                   FontFamily="Courier New" FontSize="46" FontWeight="Bold"
+                                   Foreground="#FF2200">
+                            <TextBlock.Effect>
+                                <DropShadowEffect Color="#FF2200" BlurRadius="18" Opacity="0.7" ShadowDepth="0"/>
+                            </TextBlock.Effect>
+                        </TextBlock>
+                        <TextBlock x:Name="DirDisplay"
+                                   Text=""
+                                   HorizontalAlignment="Right" VerticalAlignment="Center"
+                                   Margin="0,0,10,0"
+                                   FontSize="18" Foreground="#FF6600"
+                                   FontFamily="Segoe UI Symbol">
+                            <TextBlock.Effect>
+                                <DropShadowEffect Color="#FF6600" BlurRadius="8" Opacity="0.8" ShadowDepth="0"/>
+                            </TextBlock.Effect>
+                        </TextBlock>
+                    </Grid>
+                </Border>
+
+                <!-- 층 버튼 그리드 -->
+                <UniformGrid x:Name="FloorBtnGrid" Columns="2" Rows="3"/>
+
+                <!-- 열기 / 닫기 버튼 -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,6,0,0">
+                    <Button Style="{StaticResource ActionBtnStyle}"
+                            Content="◀▶" ToolTip="문 열기"
+                            Click="OpenDoor_Click"/>
+                    <Button Style="{StaticResource ActionBtnStyle}"
+                            Content="▶◀" ToolTip="문 닫기"
+                            Click="CloseDoor_Click"/>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>
