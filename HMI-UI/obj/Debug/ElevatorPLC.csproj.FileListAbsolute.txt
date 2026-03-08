@@ -1,0 +1,14 @@
+C:\Users\hyh01\source\repos\CSharp-Practice\ElevatorPLC\obj\Debug\ElevatorPLC.csproj.AssemblyReference.cache
+C:\Users\hyh01\source\repos\CSharp-Practice\ElevatorPLC\obj\Debug\MainWindow.baml
+C:\Users\hyh01\source\repos\CSharp-Practice\ElevatorPLC\obj\Debug\MainWindow.g.cs
+C:\Users\hyh01\source\repos\CSharp-Practice\ElevatorPLC\obj\Debug\App.g.cs
+C:\Users\hyh01\source\repos\CSharp-Practice\ElevatorPLC\obj\Debug\ElevatorPLC_MarkupCompile.cache
+C:\Users\hyh01\source\repos\CSharp-Practice\ElevatorPLC\obj\Debug\ElevatorPLC.g.resources
+C:\Users\hyh01\source\repos\CSharp-Practice\ElevatorPLC\obj\Debug\ElevatorPLC.Properties.Resources.resources
+C:\Users\hyh01\source\repos\CSharp-Practice\ElevatorPLC\obj\Debug\ElevatorPLC.csproj.GenerateResource.cache
+C:\Users\hyh01\source\repos\CSharp-Practice\ElevatorPLC\obj\Debug\ElevatorPLC.csproj.CoreCompileInputs.cache
+C:\Users\hyh01\source\repos\CSharp-Practice\ElevatorPLC\bin\Debug\ElevatorPLC.exe.config
+C:\Users\hyh01\source\repos\CSharp-Practice\ElevatorPLC\bin\Debug\ElevatorPLC.exe
+C:\Users\hyh01\source\repos\CSharp-Practice\ElevatorPLC\bin\Debug\ElevatorPLC.pdb
+C:\Users\hyh01\source\repos\CSharp-Practice\ElevatorPLC\obj\Debug\ElevatorPLC.exe
+C:\Users\hyh01\source\repos\CSharp-Practice\ElevatorPLC\obj\Debug\ElevatorPLC.pdb
