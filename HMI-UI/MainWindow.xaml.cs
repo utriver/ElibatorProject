@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using XGCommLibDemo;
 
 namespace ElevatorPLC
 {
@@ -18,6 +21,11 @@ namespace ElevatorPLC
         private readonly DispatcherTimer _moveTimer;
         private readonly DispatcherTimer _doorTimer;
         private readonly DispatcherTimer _processTimer;
+
+        // ── PLC 통신 ─────────────────────────────────────────
+        private readonly XGCommSocket    _plc = new XGCommSocket();
+        private readonly DispatcherTimer _keepAliveTimer;
+        private bool _plcConnected = false;
 
         // ── 샤프트 UI 참조 ───────────────────────────────────
         private readonly Dictionary<int, Border>    _shaftCells   = new Dictionary<int, Border>();
@@ -36,9 +44,11 @@ namespace ElevatorPLC
 
             _logic = new ElevatorLogic();
 
-            _moveTimer    = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(900)  };
-            _doorTimer    = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(2800) };
+            _moveTimer    = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(2000) };
+            _doorTimer    = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(5000) };
             _processTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(600)  };
+            _keepAliveTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+            _keepAliveTimer.Tick += KeepAliveTimer_Tick;
 
             Loaded += OnLoaded;
         }
@@ -49,6 +59,9 @@ namespace ElevatorPLC
             BuildShaftUI();
             BuildFloorGuide();
             BuildFloorButtons();
+
+            // PLC 연결 시작 (비동기, UI 블로킹 없음)
+            _ = ConnectPlcAsync();
 
             // 이벤트 연결
             _logic.StateChanged += OnStateChanged;
@@ -223,7 +236,7 @@ namespace ElevatorPLC
             {
                 if (ca.Up != null)
                 {
-                    callPanel.Children.Add(MakeCallButton("▲", floor.Number));
+                    callPanel.Children.Add(MakeCallButton("▲", floor.Number, "Up"));
                     callPanel.Children.Add(new TextBlock
                     {
                         Text                = ca.Up,
@@ -235,7 +248,7 @@ namespace ElevatorPLC
                 }
                 if (ca.Down != null)
                 {
-                    callPanel.Children.Add(MakeCallButton("▼", floor.Number));
+                    callPanel.Children.Add(MakeCallButton("▼", floor.Number, "Down"));
                     callPanel.Children.Add(new TextBlock
                     {
                         Text                = ca.Down,
@@ -280,7 +293,7 @@ namespace ElevatorPLC
             };
         }
 
-        private Button MakeCallButton(string symbol, int floor)
+        private Button MakeCallButton(string symbol, int floor, string direction)
         {
             var btn = new Button
             {
@@ -297,7 +310,18 @@ namespace ElevatorPLC
                 Tag             = floor,
             };
             int capturedFloor = floor;
-            btn.Click += (s, e) => RequestFloor(capturedFloor);
+            string capturedDir = direction;
+            btn.PreviewMouseLeftButtonDown += (s, e) =>
+            {
+                long bit = GetCallButtonBit(capturedFloor, capturedDir);
+                if (bit >= 0) WritePlcBit(bit, 1);
+                RequestFloor(capturedFloor);
+            };
+            btn.PreviewMouseLeftButtonUp += (s, e) =>
+            {
+                long bit = GetCallButtonBit(capturedFloor, capturedDir);
+                if (bit >= 0) WritePlcBit(bit, 0);
+            };
             return btn;
         }
 
@@ -367,7 +391,13 @@ namespace ElevatorPLC
                     Tag     = num,
                 };
                 int capturedNum = num;
-                btn.Click += (s, e) => RequestFloor(capturedNum);
+                btn.PreviewMouseLeftButtonDown += (s, e) =>
+                {
+                    WritePlcBit(GetFloorButtonBit(capturedNum), 1);
+                    RequestFloor(capturedNum);
+                };
+                btn.PreviewMouseLeftButtonUp += (s, e) =>
+                    WritePlcBit(GetFloorButtonBit(capturedNum), 0);
                 _floorBtns[num] = btn;
                 FloorBtnGrid.Children.Add(btn);
             }
@@ -590,7 +620,7 @@ namespace ElevatorPLC
 
             if (animated)
             {
-                var anim = new DoubleAnimation(top, new Duration(TimeSpan.FromMilliseconds(820)))
+                var anim = new DoubleAnimation(top, new Duration(TimeSpan.FromMilliseconds(1800)))
                 {
                     EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
                 };
@@ -689,15 +719,85 @@ namespace ElevatorPLC
         }
 
         // ══════════════════════════════════════════════════════
+        // PLC 통신
+        // ══════════════════════════════════════════════════════
+        private async Task ConnectPlcAsync()
+        {
+            UpdatePlcStatus(connecting: true);
+            uint result = await Task.Run(() => _plc.Connect("192.168.1.201", 2004));
+            _plcConnected = (result == (uint)XGCOMM_FUNC_RESULT.RT_XGCOMM_SUCCESS);
+            UpdatePlcStatus();
+            if (_plcConnected) _keepAliveTimer.Start();
+        }
+
+        private async void KeepAliveTimer_Tick(object sender, EventArgs e)
+        {
+            uint result = await Task.Run(() => _plc.UpdateKeepAlive());
+            bool wasConnected = _plcConnected;
+            _plcConnected = (result == (uint)XGCOMM_FUNC_RESULT.RT_XGCOMM_SUCCESS);
+            if (wasConnected != _plcConnected)
+            {
+                UpdatePlcStatus();
+                if (!_plcConnected) _ = ConnectPlcAsync(); // 자동 재연결
+            }
+        }
+
+        private void WritePlcBit(long bitOffset, byte value)
+        {
+            if (!_plcConnected) return;
+            byte[] data = new byte[] { value };
+            Task.Run(() => _plc.WriteDataBit('M', bitOffset, 1, data));
+        }
+
+        private void UpdatePlcStatus(bool connecting = false)
+        {
+            if (connecting)
+            {
+                PlcStatusText.Text       = "PLC: 연결 중...";
+                PlcStatusText.Foreground = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0x44));
+            }
+            else if (_plcConnected)
+            {
+                PlcStatusText.Text       = "PLC: 연결됨";
+                PlcStatusText.Foreground = new SolidColorBrush(Color.FromRgb(0x44, 0xDD, 0x66));
+            }
+            else
+            {
+                PlcStatusText.Text       = "PLC: 연결 끊김";
+                PlcStatusText.Foreground = new SolidColorBrush(Color.FromRgb(0xFF, 0x44, 0x44));
+            }
+        }
+
+        private static long GetFloorButtonBit(int floor) => 99 + floor; // 1F→100, 5F→104
+
+        private static long GetCallButtonBit(int floor, string direction)
+        {
+            switch (floor)
+            {
+                case 1: return 107;                               // 1F ▲ only
+                case 2: return direction == "Up" ? 108 : 109;
+                case 3: return direction == "Up" ? 110 : 111;
+                case 4: return direction == "Up" ? 112 : 113;
+                case 5: return 114;                               // 5F ▼ only
+                default: return -1;
+            }
+        }
+
+        // ══════════════════════════════════════════════════════
         // 버튼 이벤트
         // ══════════════════════════════════════════════════════
+        private void OpenDoor_MouseDown(object sender, MouseButtonEventArgs e) => WritePlcBit(105, 1);
+        private void OpenDoor_MouseUp(object sender, MouseButtonEventArgs e)   => WritePlcBit(105, 0);
+        private void CloseDoor_MouseDown(object sender, MouseButtonEventArgs e) => WritePlcBit(106, 1);
+        private void CloseDoor_MouseUp(object sender, MouseButtonEventArgs e)   => WritePlcBit(106, 0);
+
         private void OpenDoor_Click(object sender, RoutedEventArgs e)
         {
             _doorTimer.Stop();
             _logic.TriggerDoorOpen();
-            _doorTimer.Interval = TimeSpan.FromMilliseconds(4000);
+            _doorTimer.Interval = TimeSpan.FromMilliseconds(7000);
             _doorTimer.Start();
-            _doorTimer.Interval = TimeSpan.FromMilliseconds(2800);
+            _doorTimer.Interval = TimeSpan.FromMilliseconds(5000);
         }
 
         private void CloseDoor_Click(object sender, RoutedEventArgs e)

@@ -295,6 +295,14 @@
                 </Grid>
             </Border>
 
+            <!-- PLC 상태 텍스트 -->
+            <TextBlock x:Name="PlcStatusText"
+                       Text="PLC: 연결 중..."
+                       HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                       Margin="0,0,0,22"
+                       FontFamily="Courier New" FontSize="10"
+                       Foreground="#444444"/>
+
             <!-- 상태 텍스트 -->
             <TextBlock x:Name="StatusText"
                        Text="상태: 대기중"
@@ -363,9 +371,13 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,6,0,0">
                     <Button Style="{StaticResource ActionBtnStyle}"
                             Content="◀▶" ToolTip="문 열기"
+                            PreviewMouseLeftButtonDown="OpenDoor_MouseDown"
+                            PreviewMouseLeftButtonUp="OpenDoor_MouseUp"
                             Click="OpenDoor_Click"/>
                     <Button Style="{StaticResource ActionBtnStyle}"
                             Content="▶◀" ToolTip="문 닫기"
+                            PreviewMouseLeftButtonDown="CloseDoor_MouseDown"
+                            PreviewMouseLeftButtonUp="CloseDoor_MouseUp"
                             Click="CloseDoor_Click"/>
                 </StackPanel>
             </StackPanel>
